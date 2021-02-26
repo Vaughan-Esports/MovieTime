@@ -1,53 +1,36 @@
 import os
 from moviepy.editor import *
+from skimage.filters import gaussian
 import tkinter as tk
 from tkinter import filedialog
-from PIL import Image
-import mimetypes
-import random
-import string
 from moviepy.config import change_settings
-change_settings({"IMAGEMAGIC_BINARY": r"C:\Program Files\ImageMagick-7.0.10-Q16\\magick.exe"})
+change_settings({"IMAGEMAGICK_BINARY": r"C:\\Program Files\\ImageMagick-7.0.10-Q16\\magick.exe"})
 
-class FileObject:
-    def __init__(self, path, label, data_type):
-        self.path = path
-        self.label = label
-        self.data_type = data_type
+root = tk.Tk()
+root.withdraw()
 
-class VideoEditorGUI(tk.Frame):
-    def __init__(self,master):
-        self.master =master
-        tk.Frame.__init__(self, self.master)
-        self.gui = self.configure_gui()
-        self.widgets = self.create_widgets()
-        self.importedObjects = []
+# opens selected video file
+file_path = filedialog.askopenfilename()
 
-    def configure_gui(self):
-        self.master.geometry('1280x760')
+# video editing
+def blur(image):
+    """ Returns a blurred (radius=5 pixels) version of the image """
+    return gaussian(image.astype(float), sigma=5)
 
-    def create_widgets(self):
-        importButoon = tk.Button(self.master, text="Import", font=('Helvatica', 18), padx=10, pady=5, fg="#FFF",bg="#3582e8", command=self.open_dialog)
-        importButoon.grid(sticky="W", column=0, row=0, padx=10, pady=10)
 
-        processButton = tk.Button(self.master, text="Process", font=('Helvatica', 18), padx=10, pady=5, fg="#FFF", bg="#3582e8", command=self.processData)
-        processButton.grid(sticky="W", column=0, row=1, padx=10, pady=10)
+video = VideoFileClip(file_path)
+video_resized = video.resize((1080,1920))
+video_blurred = video_resized.fl_image( blur )
+video_blurred_final = video_blurred.set_fps(5)
+video_small = video.resize((1080,640))
+video_small_center = video_small.set_pos('center')
+video_small_final = video_small_center.set_fps(30)
 
-        overlayEntry = tk.Entry(self.master, width=15, text="title", font=("Helvatica", 18))
-        overlayEntry.grid(sticky="W", column=0, row=2, padx=10, pady=10)
+# file directory and name
+dir_name = filedialog.askdirectory()
+file_name_extenstion = "/" + input("Enter Clip Name: ")
+video_name = dir_name + file_name_extenstion + ".mp4"
 
-        return overlayEntry
-    def open_dialog(self):
-        self.master.filename = filedialog.askopenfilename(initialdir="/", title="Select Your Files", filetypes=[('All files', '*.*')])
-        #read the type of file based on the given path
-        if mimetypes.guess_type(self.master.filename)[0].startswith('video')
 
-    def processData(self):
-        print("Processing")
-
-if __name__ == '__main__':
-    root = tk.Tk()
-    root.title("Video Editor")
-
-    main_app = VideoEditorGUI(root)
-    root.mainloop()
+final_clip = CompositeVideoClip([video_blurred_final, video_small_final])
+final_clip.write_videofile(video_name, codec='libx264', audio_codec='aac' )
