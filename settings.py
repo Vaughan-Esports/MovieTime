@@ -1,3 +1,3 @@
 # bot settings
-prefix = "tiktok"
+prefix = "edit!"
 description = "Video Editing Bot for Vaughan Esports"
