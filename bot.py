@@ -33,6 +33,10 @@ load_dotenv(dotenv_path)
 async def tiktok(ctx):
     await ctx.send(f'Send a file to be rendered. It must be a `.mp4`.')
 
+    await bot.change_presence(activity=discord.Activity(
+        type=discord.ActivityType.watching,
+        name='for a video upload'))
+
     # check for file
     def check(message):
         return message.author == ctx.author and \
@@ -48,10 +52,15 @@ async def tiktok(ctx):
 
     # save file
     await msg.attachments[0].save('temp/input.mp4')
+    await ctx.send('File saved, now rendering...')
     # render file
+    await bot.change_presence(activity=discord.Game(
+        name='| Rendering a video...'))
     await tiktok_blur('temp/input.mp4')
     # upload file to imgur
-    await ctx.send(f'Here\'s your video: {await upload()}')
+    await ctx.send(f'{ctx.author.menion}, here\'s your video: {await upload()}')
+
+    await bot.change_presence(activity=discord.Game(name='nothing :)'))
 
 
 bot.run(os.getenv('BOT_TOKEN'))
