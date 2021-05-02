@@ -58,7 +58,7 @@ async def tiktok(ctx):
         name='| Rendering a video...'))
     await tiktok_blur('temp/input.mp4')
     # upload file to imgur
-    await ctx.send(f'{ctx.author.menion}, here\'s your video: {await upload()}')
+    await ctx.send(f'{ctx.author.mention}, here\'s your video: {await upload()}')
 
     await bot.change_presence(activity=discord.Game(name='nothing :)'))
 
